@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스톱워치 앱</title>
+    <!-- Tailwind CSS 라이브러리 가져오기 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <!-- 페이지 전체를 중앙에 배치하고 어두운 배경 설정 -->
+    <div class="flex items-center justify-center min-h-screen bg-gray-900">
+        <!-- 스톱워치 카드: 흰색 박스에 그림자 효과 -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-80">
+            <!-- 제목 -->
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">스톱워치</h1>
+
+            <!-- 시간 표시 영역: 큰 텍스트로 시간을 표시 -->
+            <div class="bg-gray-100 rounded-xl p-8 mb-8 text-center">
+                <div id="display" class="text-6xl font-mono font-bold text-blue-600">
+                    00:00:00
+                </div>
+                <!-- 위 코드 설명:
+                     - id="display": JavaScript에서 시간을 업데이트할 때 사용
+                     - text-6xl: 매우 큰 텍스트 크기
+                     - font-mono: 고정폭 글꼴 (시간이 정렬되어 보임)
+                     - text-blue-600: 파란색 텍스트
+                -->
+            </div>
+
+            <!-- 버튼 영역: 버튼들을 가로로 배치 -->
+            <div class="flex gap-4 mb-4">
+                <!-- 시작/일시정지 버튼 -->
+                <button
+                    id="startBtn"
+                    class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105"
+                >
+                    시작
+                </button>
+                <!-- 위 코드 설명:
+                     - id="startBtn": JavaScript에서 클릭 이벤트 처리할 때 사용
+                     - flex-1: 사용 가능한 공간을 균등하게 차지
+                     - hover:bg-blue-600: 마우스 올릴 때 더 어두운 파란색
+                     - transition duration-200: 0.2초에 걸쳐 부드럽게 변함
+                     - hover:scale-105: 마우스 올릴 때 5% 커짐
+                -->
+            </div>
+
+            <!-- 리셋 버튼: 전체 너비 차지 -->
+            <button
+                id="resetBtn"
+                class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105"
+            >
+                리셋
+            </button>
+            <!-- 위 코드 설명:
+                 - id="resetBtn": JavaScript에서 클릭 이벤트 처리할 때 사용
+                 - w-full: 버튼이 전체 너비를 차지
+                 - bg-red-500: 빨간색 배경
+            -->
+        </div>
+    </div>
+
+    <script>
+        // ========== 변수 선언 ==========
+        // 경과 시간을 밀리초(1000분의 1초) 단위로 저장
+        let elapsed = 0;
+
+        // 시간이 실행 중인지를 나타내는 플래그 (true = 실행 중, false = 중지)
+        let isRunning = false;
+
+        // setInterval()을 저장하는 변수 (나중에 중지할 때 사용)
+        let intervalId = null;
+
+        // ========== HTML 요소 가져오기 ==========
+        // 화면에 시간을 표시하는 요소
+        const display = document.getElementById('display');
+
+        // 시작/일시정지 버튼
+        const startBtn = document.getElementById('startBtn');
+
+        // 리셋 버튼
+        const resetBtn = document.getElementById('resetBtn');
+
+        // ========== 시간을 화면에 표시하는 함수 ==========
+        function updateDisplay() {
+            // elapsed를 1000으로 나누어 초 단위로 변환 (밀리초 → 초)
+            const totalSeconds = Math.floor(elapsed / 1000);
+
+            // 초에서 시간(hours), 분(minutes), 초(seconds) 추출
+            const hours = Math.floor(totalSeconds / 3600);      // 1시간 = 3600초
+            const minutes = Math.floor((totalSeconds % 3600) / 60);  // 남은 초에서 분 계산
+            const seconds = totalSeconds % 60;                  // 분 이후 남은 초
+
+            // 숫자가 한 자리일 때 앞에 0을 붙이기 (예: 5 → 05)
+            // padStart(2, '0')은 최소 2자리, 모자란 부분에 '0'을 채운다는 뜻
+            const formattedTime =
+                String(hours).padStart(2, '0') + ':' +
+                String(minutes).padStart(2, '0') + ':' +
+                String(seconds).padStart(2, '0');
+
+            // 계산한 시간을 화면에 표시
+            display.textContent = formattedTime;
+        }
+
+        // ========== 시작/일시정지 버튼 클릭했을 때 ==========
+        startBtn.addEventListener('click', function() {
+            if (isRunning) {
+                // 이미 실행 중이면 → 일시정지
+                clearInterval(intervalId);  // setInterval() 중지
+                isRunning = false;
+                startBtn.textContent = '시작';  // 버튼 텍스트를 "시작"으로 변경
+                startBtn.classList.remove('bg-red-500', 'hover:bg-red-600');  // 빨간색 제거
+                startBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');   // 파란색 추가
+            } else {
+                // 중지 중이면 → 시작
+                isRunning = true;
+                startBtn.textContent = '일시정지';  // 버튼 텍스트를 "일시정지"로 변경
+                startBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');  // 파란색 제거
+                startBtn.classList.add('bg-red-500', 'hover:bg-red-600');       // 빨간색 추가
+
+                // 100밀리초(0.1초)마다 경과시간을 10씩 증가시키고 화면 업데이트
+                intervalId = setInterval(function() {
+                    elapsed += 10;  // 10밀리초 증가
+                    updateDisplay();  // 화면에 새로운 시간 표시
+                }, 10);
+            }
+        });
+
+        // ========== 리셋 버튼 클릭했을 때 ==========
+        resetBtn.addEventListener('click', function() {
+            // setInterval() 중지 (실행 중일 경우)
+            clearInterval(intervalId);
+
+            // 모든 변수를 초기값으로 리셋
+            elapsed = 0;           // 경과시간 = 0
+            isRunning = false;      // 실행 상태 = 중지
+
+            // 버튼을 초기 상태로 변경
+            startBtn.textContent = '시작';
+            startBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+            startBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+
+            // 화면을 00:00:00으로 리셋
+            updateDisplay();
+        });
+
+        // 처음 화면 표시 (초기값 00:00:00)
+        updateDisplay();
+    </script>
+</body>
+</html>

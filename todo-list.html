@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>할 일 목록 앱</title>
+    <!-- Tailwind CSS CDN 가져오기 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen py-8">
+    <!-- 전체 컨테이너 -->
+    <div class="max-w-md mx-auto">
+        <!-- 카드 스타일의 메인 박스 -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <!-- 제목 -->
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">
+                📝 할 일 목록
+            </h1>
+
+            <!-- 입력 필드와 추가 버튼 섹션 -->
+            <div class="flex gap-2 mb-6">
+                <!-- 할 일 입력 필드 -->
+                <input
+                    type="text"
+                    id="todoInput"
+                    placeholder="새로운 할 일을 입력하세요..."
+                    class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                >
+                <!-- 추가 버튼 -->
+                <button
+                    id="addBtn"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold transition transform hover:scale-105 active:scale-95"
+                >
+                    추가
+                </button>
+            </div>
+
+            <!-- 할 일 목록 -->
+            <ul id="todoList" class="space-y-2">
+                <!-- 할 일 항목들이 여기에 동적으로 추가됩니다 -->
+            </ul>
+
+            <!-- 완료된 할 일이 없을 때 보여줄 메시지 -->
+            <div id="emptyMessage" class="text-center text-gray-400 py-8">
+                ✨ 아직 할 일이 없습니다. 새로운 할 일을 추가해보세요!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // HTML에서 필요한 요소들을 찾아서 변수에 저장합니다
+        const todoInput = document.getElementById('todoInput');
+        const addBtn = document.getElementById('addBtn');
+        const todoList = document.getElementById('todoList');
+        const emptyMessage = document.getElementById('emptyMessage');
+
+        // 페이지가 로드될 때 저장된 할 일들을 불러옵니다
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        renderTodos();
+
+        // 추가 버튼을 클릭했을 때 실행되는 함수
+        addBtn.addEventListener('click', addTodo);
+
+        // Enter 키를 눌렀을 때도 할 일이 추가되도록 합니다
+        todoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        // 할 일을 추가하는 함수
+        function addTodo() {
+            const text = todoInput.value.trim(); // 입력값의 앞뒤 공백을 제거합니다
+
+            // 입력값이 비어있으면 함수를 종료합니다
+            if (text === '') {
+                alert('할 일을 입력해주세요!');
+                return;
+            }
+
+            // 새로운 할 일 객체를 만듭니다
+            const newTodo = {
+                id: Date.now(), // 현재 시간을 고유한 ID로 사용합니다
+                text: text,
+                completed: false // 처음에는 완료되지 않은 상태입니다
+            };
+
+            // todos 배열에 새 할 일을 추가합니다
+            todos.push(newTodo);
+
+            // 브라우저의 저장소(localStorage)에 저장합니다
+            saveTodos();
+
+            // 입력 필드를 비웁니다
+            todoInput.value = '';
+
+            // 화면을 새로 그립니다
+            renderTodos();
+
+            // 입력 필드에 포커스를 맞춰 바로 다음 입력을 받을 수 있게 합니다
+            todoInput.focus();
+        }
+
+        // 할 일 목록을 화면에 그리는 함수
+        function renderTodos() {
+            // 할 일 목록을 모두 비웁니다
+            todoList.innerHTML = '';
+
+            // 각 할 일에 대해 반복합니다
+            todos.forEach((todo) => {
+                // 새로운 리스트 아이템을 만듭니다
+                const li = document.createElement('li');
+
+                // 리스트 아이템의 HTML 구조를 설정합니다
+                li.innerHTML = `
+                    <!-- 할 일 항목 전체를 감싸는 컨테이너 -->
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                        <!-- 체크박스 -->
+                        <input
+                            type="checkbox"
+                            class="w-5 h-5 text-blue-500 rounded cursor-pointer"
+                            ${todo.completed ? 'checked' : ''}
+                            onchange="toggleTodo(${todo.id})"
+                        >
+                        <!-- 할 일 텍스트 -->
+                        <span class="flex-1 text-lg ${
+                            todo.completed
+                                ? 'line-through text-gray-400'
+                                : 'text-gray-800'
+                        }">
+                            ${todo.text}
+                        </span>
+                        <!-- 삭제 버튼 -->
+                        <button
+                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold transition"
+                            onclick="deleteTodo(${todo.id})"
+                        >
+                            삭제
+                        </button>
+                    </div>
+                `;
+
+                // 만든 리스트 아이템을 목록에 추가합니다
+                todoList.appendChild(li);
+            });
+
+            // 할 일이 없으면 빈 메시지를 보여줍니다
+            if (todos.length === 0) {
+                emptyMessage.style.display = 'block';
+            } else {
+                emptyMessage.style.display = 'none';
+            }
+        }
+
+        // 할 일의 완료 상태를 토글하는 함수
+        function toggleTodo(id) {
+            // 주어진 ID의 할 일을 찾아서 완료 상태를 반대로 바꿉니다
+            const todo = todos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                saveTodos();
+                renderTodos();
+            }
+        }
+
+        // 할 일을 삭제하는 함수
+        function deleteTodo(id) {
+            // 주어진 ID가 아닌 할 일들만 남기고 삭제합니다
+            todos = todos.filter(t => t.id !== id);
+            saveTodos();
+            renderTodos();
+        }
+
+        // 할 일 목록을 localStorage에 저장하는 함수
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+    </script>
+</body>
+</html>

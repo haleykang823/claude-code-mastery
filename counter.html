@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카운터 앱</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-80">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">카운터 앱</h1>
+
+        <!-- 현재 카운트 표시 -->
+        <div class="bg-blue-50 rounded-lg p-8 mb-8 text-center">
+            <p class="text-gray-600 text-sm mb-2">현재 카운트</p>
+            <p id="count" class="text-6xl font-bold text-blue-600">0</p>
+        </div>
+
+        <!-- 버튼들 -->
+        <div class="flex gap-4 mb-4">
+            <!-- 감소 버튼 (-1) -->
+            <button
+                onclick="decreaseCount()"
+                class="flex-1 bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105"
+            >
+                -1
+            </button>
+
+            <!-- 증가 버튼 (+1) -->
+            <button
+                onclick="increaseCount()"
+                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105"
+            >
+                +1
+            </button>
+        </div>
+
+        <!-- 리셋 버튼 -->
+        <button
+            onclick="resetCount()"
+            class="w-full bg-blue-300 hover:bg-blue-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105"
+        >
+            리셋
+        </button>
+    </div>
+
+    <script>
+        // 초기 카운트 값을 0으로 설정
+        let count = 0;
+
+        // 증가 버튼 클릭 시 실행되는 함수
+        function increaseCount() {
+            count++; // count 값을 1 증가
+            updateDisplay(); // 화면에 표시된 숫자 업데이트
+        }
+
+        // 감소 버튼 클릭 시 실행되는 함수
+        function decreaseCount() {
+            count--; // count 값을 1 감소
+            updateDisplay(); // 화면에 표시된 숫자 업데이트
+        }
+
+        // 리셋 버튼 클릭 시 실행되는 함수
+        function resetCount() {
+            count = 0; // count 값을 0으로 초기화
+            updateDisplay(); // 화면에 표시된 숫자 업데이트
+        }
+
+        // 화면에 표시된 숫자를 업데이트하는 함수
+        function updateDisplay() {
+            document.getElementById("count").textContent = count;
+        }
+    </script>
+</body>
+</html>
